@@ -92,8 +92,15 @@ extern "C" {
 #define LED_A_ON		GPIO_PIN_SET
 #define LED_A_OFF		GPIO_PIN_RESET
 
+#define LED_01_PIN		D11_Pin
+#define LED_01_PORT		GPIOA
+#define LED_01_ON		GPIO_PIN_SET
+#define LED_01_OFF		GPIO_PIN_RESET
 
-
+#define LED_02_PIN		D12_Pin
+#define LED_02_PORT		GPIOA
+#define LED_02_ON		GPIO_PIN_SET
+#define LED_02_OFF		GPIO_PIN_RESET
 
 #endif
 
