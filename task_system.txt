@@ -1,0 +1,91 @@
+-task_system_attribute.h
+
+Define los atributos del sistema de tareas, principalmente para modelar un autómata de estados finitos (FSM, Finite State Machine).
+En typedef enum task_system_ev define los eventos del sistema
+               EV_SYS_IDLE,
+							 EV_SYS_LOOP_DET,
+							 EV_SYS_NOT_LOOP_DET,
+							 EV_SYS_MANUAL_BTN,
+							 EV_SYS_NOT_MANUAL_BTN,
+							 EV_SYS_IR_PHO_CELL,
+							 EV_SYS_NOT_IR_PHO_CELL
+En typedef enum task_system_st se definen los estados del sistema 
+               ST_SYS_IDLE,
+							 ST_SYS_ACTIVE_01,
+							 ST_SYS_ACTIVE_02,
+							 ST_SYS_ACTIVE_03,
+							 ST_SYS_ACTIVE_04,
+							 ST_SYS_ACTIVE_05,
+							 ST_SYS_ACTIVE_06
+
+En typedef struct se definen los tipos de datos
+	uint32_t: tick
+	task_system_st_t: state
+	task_system_ev_t: event
+	bool: flag
+
+-task_system_interface.h
+
+Inicializa la cola de eventos con init_queue_event_task_system
+Agrega un evento a la cola con put_event_task_system
+Obtiene el próximo evento en la cola con get_event_task_system
+Analiza si hay eventos pendientes en la cola con any_event_task_system
+
+-------------------------------------------------------------------------------------------------------------------------
+task_system.png
+
+Maquina de sistema que modela el comportamiento de una barrera, implementada en itemis CREATE.
+
+Estados:
+
+-ST_SYS_IDLE -> El sistema esta en estado de espera 
+-ST_SYS_ACTIVE_01 -> Una vez detecte un loop (auto) comienza el proceso esperando a que se precione el boton.
+-ST_SYS_ACTIVE_02 -> Una vez precionado el boton comienza a abrirse la barrera.
+-ST_SYS_ACTIVE_03 -> Se mantiene arriba la barrera hasta que no detecte el loop (auto).
+-ST_SYS_ACTIVE_04 -> No detecta mas el loop significando que auto esta en movimiento.
+-ST_SYS_ACTIVE_05 -> No detecte mas el auto en movimiento por el infrarojo.
+-ST_SYS_ACTIVE_06 -> Comienza a bajar la barrera volviendo al estado idle y cierra el ciclo.
+
+Eventos:
+
+-EV_SYS_LOOP_DETECTOR -> La placa debajo detecta el auto arriba de ella.
+-EV_SYS_MANUAL_BUTON -> Se detecta como el usuario presiona el boton.
+-EV_SYS_NOT_LOOP_DETECTOR -> La placa debajo no detecta el auto arriba de ella.
+-EV_SYS_IR_PHOTO_CELL -> El infrarojo de la barrera detecta el auto en movimiento por abajo.
+-EV_SYS_NOT_IR_PHOTO_CELL -> El infrarojo de la barrera no detecta el auto en movimiento por abajo.
+-EV_LED_01_OFF -> Deja de manera apagada la luz led 01.
+-EV_LED_02_OFF -> Deja de manera apagada la luz led 02.
+-EV_LED_01_ON -> Deja de manera prentida la luz led 01.
+-EV_LED_02_ON -> Deja de manera prentida la luz led 02.
+-EV_LED_01_BLINK -> Titila la luz led.
+Equivalentes a constantes enteras enumeradas (enum) en C.
+
+Acciones:
+
+tick = DEL_SYS_MAX ->inicializa un temporizador al valor máximo permitido.
+[tick > DEL_SYS_MIN]/tick-- -> decrementa ese temporizador mientras dure la transición hasta llegar al valor minimo
+Corresponden con asignaciones a variables y disparos de eventos.
+
+Tipos de datos:
+
+tick: entero que actúa como contador/temporizador.
+Constantes: DEL_SYS_MAX, DEL_SYS_MIN: límites de tiempo configurados (#define o const uint32_t).	
+Eventos: Representados como banderas booleanas o como valores de un enum.
+
+----------------------------------------------------------------------------------------------------------------------------
+Evolucion de g_app_runtime_us
+
+Al iniciar cada ciclo de actualización de la aplicación, g_app_runtime_us se reinicia. Luego, se ejecutan todas las tareas.
+Para cada tarea se mide el tiempo de ejecución real en microsegundos usando el DWT cycle counter.
+Ese tiempo se acumula en g_app_runtime_us.
+Al terminar el ciclo, g_app_runtime_us contiene el tiempo total de CPU consumido por todas las tareas en esa iteración.
+En el siguiente ciclo de app_update(), el proceso se repite: se reinicia y vuelve a calcularse.
+
+Evolucion WCET
+
+El WCET de cada tarea se pone en cero.
+Cada vez que se ejecuta una tarea, se mide cuánto tardó en ese ciclo utilizando cycle_counter_time_us.
+Si ese tiempo supera al WCET guardado, se actualiza y si es menor o igual, el WCET no cambia.
+Cada WCET (de task_tda_list[x]) comienza en 0.
+
+
