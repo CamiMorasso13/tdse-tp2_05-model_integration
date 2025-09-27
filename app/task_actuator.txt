@@ -1,7 +1,15 @@
-  task_actuator.c (task_actuator.h, task_actuator_attribute.h) 
-   Non-Blocking & Update By Time Code -> Actuator Modeling
+----------------------------------------------------------------------------------------------------------------------------
+Evolucion de g_app_runtime_us
 
-  task_actuator_interface.c (task_actuator_interface.h)
-   Non-Blocking Code
+Al iniciar cada ciclo de actualización de la aplicación, g_app_runtime_us se reinicia. Luego, se ejecutan todas las tareas.
+Para cada tarea se mide el tiempo de ejecución real en microsegundos usando el DWT cycle counter.
+Ese tiempo se acumula en g_app_runtime_us.
+Al terminar el ciclo, g_app_runtime_us contiene el tiempo total de CPU consumido por todas las tareas en esa iteración.
+En el siguiente ciclo de app_update(), el proceso se repite: se reinicia y vuelve a calcularse.
 
-...
+Evolucion WCET
+
+El WCET de cada tarea se pone en cero.
+Cada vez que se ejecuta una tarea, se mide cuánto tardó en ese ciclo utilizando cycle_counter_time_us.
+Si ese tiempo supera al WCET guardado, se actualiza y si es menor o igual, el WCET no cambia.
+Cada WCET (de task_tda_list[x]) comienza en 0.
