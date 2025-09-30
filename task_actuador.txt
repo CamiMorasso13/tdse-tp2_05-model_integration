@@ -1,3 +1,7 @@
+Tal como se verificó para el actuador incorporado en la propia placa "LED2 Green" está configurado como "LED active low".
+Se usará la misma configuración para los actuadores adicionales que añadimos.
+
+-------------------------------------------------------------------------------------------------------------------------------------
 -task_actuador_attribute.h
 
 Se incluye una tabla de transición de estados para describir el comportamiento de un LED:
@@ -70,6 +74,7 @@ El WCET de cada tarea se pone en cero.
 Cada vez que se ejecuta una tarea, se mide cuánto tardó en ese ciclo utilizando cycle_counter_time_us.
 Si ese tiempo supera al WCET guardado, se actualiza y si es menor o igual, el WCET no cambia.
 Cada WCET (de task_tda_list[x]) comienza en 0.
+
 
 
 
