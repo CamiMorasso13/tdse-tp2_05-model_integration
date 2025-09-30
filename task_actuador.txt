@@ -1,0 +1,75 @@
+-task_actuador_attribute.h
+
+Se incluye una tabla de transición de estados para describir el comportamiento de un LED:
+Estados: apagado, encendido, parpadeo, pulso: EV_LED_XX_ON, EV_LED_XX_OFF, EV_LED_XX_BLINK, EV_LED_XX_PULSE
+
+Enumeraciones:
+task_actuator_ev_t -> eventos que puede recibir la tarea
+task_actuator_st_t -> estados posibles del actuador
+task_actuator_id_t -> identificadores de actuadores
+
+Estructuras
+task_actuator_cfg_t -> configuración estática de un actuador
+task_actuator_dta_t -> datos dinámicos del actuador en tiempo de ejecución
+
+Realiza declaraciones externas con extern task_actuator_dta_t task_actuator_dta_list[];
+La cual permitee que la lógica en otros archivos acceda al estado dinámico de los actuadores
+
+-task_actuador_interface.h
+
+extern void put_event_task_actuator(task_actuator_ev_t event, task_actuator_id_t identifier);
+Esta función permite inyectar eventos en la máquina de estados del actuador.
+Se especifica qué evento ocurre y a qué actuador va dirigido.
+El objetivo es desacoplar la lógica interna del actuador de los módulos externos que lo controlan
+
+-------------------------------------------------------------------------------------------------------------------------
+task_actuador.png
+
+Maquina de sistema que modela el comportamiento de una barrera, implementada en itemis CREATE.
+
+Estados:
+
+- ST_LED_XX_OFF -> La luz led esta en estado apagado
+- ST_LED_XX_ON -> La luz led esta en estado encendida
+- ST_LED_XX_BLINK_ON -> Comienza el estado de titilación de la luz led
+- ST_LED_XX_BLINK_OFF -> Finalizado el estado de titilación de la luz led
+- ST_LED_XX_PULSE -> La luz led esta en estado de pulso
+
+
+Eventos:
+
+-EV_LED_XX_OFF -> Deja de manera apagada la luz led 
+-EV_LED_XX_ON -> Deja de manera prentida la luz led
+-EV_LED_XX_BLINK -> Titila la luz led.
+Equivalentes a constantes enteras enumeradas (enum) en C.
+
+Acciones:
+
+tick = DEL_LED_XX_MAX ->inicializa un temporizador al valor máximo permitido.
+[tick > DEL_LED-XX_MIN]/tick-- -> decrementa ese temporizador mientras dure la transición hasta llegar al valor minimo
+Corresponden con asignaciones a variables y disparos de eventos.
+
+Tipos de datos:
+
+tick: entero que actúa como contador/temporizador.
+Constantes: DEL_LED_XX_MAX, DEL_LED-XX_MIN: límites de tiempo configurados (#define o const uint32_t).	
+Eventos: Representados como banderas booleanas o como valores de un enum.
+
+----------------------------------------------------------------------------------------------------------------------------
+Evolucion de g_app_runtime_us
+
+Al iniciar cada ciclo de actualización de la aplicación, g_app_runtime_us se reinicia. Luego, se ejecutan todas las tareas.
+Para cada tarea se mide el tiempo de ejecución real en microsegundos usando el DWT cycle counter.
+Ese tiempo se acumula en g_app_runtime_us.
+Al terminar el ciclo, g_app_runtime_us contiene el tiempo total de CPU consumido por todas las tareas en esa iteración.
+En el siguiente ciclo de app_update(), el proceso se repite: se reinicia y vuelve a calcularse.
+
+Evolucion WCET
+
+El WCET de cada tarea se pone en cero.
+Cada vez que se ejecuta una tarea, se mide cuánto tardó en ese ciclo utilizando cycle_counter_time_us.
+Si ese tiempo supera al WCET guardado, se actualiza y si es menor o igual, el WCET no cambia.
+Cada WCET (de task_tda_list[x]) comienza en 0.
+
+
+
