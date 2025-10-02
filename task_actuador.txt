@@ -60,6 +60,7 @@ Constantes: DEL_LED_XX_MAX, DEL_LED-XX_MIN: límites de tiempo configurados (#de
 Eventos: Representados como banderas booleanas o como valores de un enum.
 
 ----------------------------------------------------------------------------------------------------------------------------
+
 Evolucion de g_app_runtime_us
 
 Al iniciar cada ciclo de actualización de la aplicación, g_app_runtime_us se reinicia. Luego, se ejecutan todas las tareas.
@@ -67,6 +68,7 @@ Para cada tarea se mide el tiempo de ejecución real en microsegundos usando el 
 Ese tiempo se acumula en g_app_runtime_us.
 Al terminar el ciclo, g_app_runtime_us contiene el tiempo total de CPU consumido por todas las tareas en esa iteración.
 En el siguiente ciclo de app_update(), el proceso se repite: se reinicia y vuelve a calcularse.
+Comienza en Value = 0 y termina en Value = 20. Al presionar el botón baja a Value = 19 y al soltarlo sube a 20. 
 
 Evolucion WCET
 
@@ -74,7 +76,8 @@ El WCET de cada tarea se pone en cero.
 Cada vez que se ejecuta una tarea, se mide cuánto tardó en ese ciclo utilizando cycle_counter_time_us.
 Si ese tiempo supera al WCET guardado, se actualiza y si es menor o igual, el WCET no cambia.
 Cada WCET (de task_tda_list[x]) comienza en 0.
-
-
-
+- WCET del [0] cambia a 12
+- WCET del [1] cambia a 4
+- WCET del [2] cambia a 4
+Luego, al mantener apretado el botón cambian a 14, 6, 6, respectivamente. Al soltarlo cambia a 14, 7, 6, respectivamente.
 
